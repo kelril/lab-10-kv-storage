@@ -1,7 +1,3 @@
-//
-// Created by mora on 4/20/20.
-//
-
 #ifndef UNTITLED_CONSTANTS_H
 #define UNTITLED_CONSTANTS_H
 const std::string CHARACTERS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";

@@ -6,16 +6,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 option(BUILD_COVERAGE "Build coverage" OFF)
 
 set(
-  HUNTER_CACHE_SERVERS
-  "https://github.com/bmstu-iu8-cpp-sem-3/hunter-cache"
-  CACHE STRING "Default cache server"
+        HUNTER_CACHE_SERVERS
+        "https://github.com/bmstu-iu8-cpp-sem-3/hunter-cache"
+        CACHE STRING "Default cache server"
 )
 
 include("tools/gate/cmake/HunterGate.cmake")
 
 HunterGate(
-  URL "https://github.com/cpp-pm/hunter/archive/v0.23.218.tar.gz"
-  SHA1 "9a3594a61227967fb92159339ba326701b287b19"
+        URL "https://github.com/cpp-pm/hunter/archive/v0.23.218.tar.gz"
+        SHA1 "9a3594a61227967fb92159339ba326701b287b19"
 )
 
 
@@ -27,29 +27,66 @@ string(APPEND CMAKE_CXX_FLAGS " -Wshadow -Wnon-virtual-dtor")
 
 hunter_add_package(GTest)
 find_package(GTest CONFIG REQUIRED)
+hunter_add_package(Boost
+        COMPONENTS
+        program_options
+        thread
+        log
+        filesystem)
+find_package(Boost
+        CONFIG REQUIRED
+        program_options
+        thread
+        log
+        log_setup
+        filesystem)
 
+hunter_add_package(rocksdb)
+find_package(RocksDB CONFIG REQUIRED)
+find_package(Threads)
+
+add_library(logs INTERFACE
+        )
+add_library(header INTERFACE
+        )
 # TODO: change template word to project name and delete this comment
 add_library(template STATIC
-  # enum your files and delete this comment
-  ${CMAKE_CURRENT_SOURCE_DIR}/sources/source.cpp
-)
+        # enum your files and delete this comment
+        ${CMAKE_CURRENT_SOURCE_DIR}/sources/DBHashCreator.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/sources/logs.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/sources/main.cpp
+        )
 add_executable(tests
-  # TODO: enum your files and delete this comment
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests/test.cpp
-)
+        # TODO: enum your files and delete this comment
+        ${CMAKE_CURRENT_SOURCE_DIR}/tests/test.cpp
+        )
 
 # TODO: change template word to project name and delete this comment
-target_include_directories(template 
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
-target_include_directories(tests 
-  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
+target_include_directories(template
+        PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+        )
+target_include_directories(tests
+        PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+        )
 # TODO: change template word to project name and delete this comment
 target_link_libraries(tests GTest::main template)
 
+target_include_directories(
+        header
+        INTERFACE $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+
+target_include_directories(
+        logs
+        INTERFACE $<BUILD_INTERFACE:${${PROJECT_NAME}_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+target_link_libraries(template Boost::log Boost::thread Boost::program_options Boost::log_setup Boost::filesystem
+        RocksDB::rocksdb)
+target_link_libraries(header INTERFACE Boost::log Boost::thread Boost::program_options Boost::log_setup Boost::filesystem
+        RocksDB::rocksdb)
+
 enable_testing()
-add_test(NAME unit_tests COMMAND tests) 
+add_test(NAME unit_tests COMMAND tests)
 
 if(BUILD_COVERAGE)
   set(ENABLE_COVERAGE ON CACHE BOOL "Enable coverage build." FORCE)
