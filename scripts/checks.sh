@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-files=`find . -name "*.cpp" -or -name "*.hpp" -or -name ".h" | grep -v "./tools/*"`
+files=`find . -name "*.cpp" -or -name "*.hpp" -or -name ".h" | grep -v "./tools/*" | grep -v "picosha2.hpp" | grep -v "logs.*" | grep -v "constants.hpp"`
 filter=-build/c++11,-runtime/references,-whitespace/braces,-whitespace/indent,-whitespace/comments,-build/include_order
 echo $files | xargs cpplint --filter=$filter
 
