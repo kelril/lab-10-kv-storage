@@ -39,12 +39,6 @@ public:
             _path(path),
             _logLVL(logLVL),  _threadCountHash(threadCount){}
 
-    void createDB();
-
-    FContainer randomFillFamilies();
-
-    void randomFillStrings(const FContainer &container);
-
     FDescriptorContainer getFamilyDescriptors();
 
     FHandlerContainer openDB(const FDescriptorContainer &);
@@ -52,10 +46,6 @@ public:
     StrContainer getStrs(rocksdb::ColumnFamilyHandle *);
 
     void getHash(rocksdb::ColumnFamilyHandle *, StrContainer);
-
-    std::string getRandomString(std::size_t);
-
-    void randomFill();
 
     void startHash(FHandlerContainer *, std::list<StrContainer> *);
 

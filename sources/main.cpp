@@ -43,7 +43,5 @@ int main(int argc, char **argv) {
     logs::logInFile();
     DBHashCreator db(pathToFile, threadCount, logLVL);
     db.startThreads();
-//    db.createDB();
-//    db.randomFill();
     return 0;
 }

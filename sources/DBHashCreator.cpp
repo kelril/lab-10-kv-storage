@@ -41,18 +41,6 @@ FHandlerContainer DBHashCreator::openDB
     return handlers;
 }
 
-void DBHashCreator::createDB() {
-    //maybe remove
-    rocksdb::DB *dbPtr;
-    rocksdb::Options options;
-    options.create_if_missing = true; //if directory not exist
-
-    rocksdb::Status status = rocksdb::DB::Open(options, _path, &dbPtr);
-    assert(status.ok()); //if 0 -> exit
-
-    _db.reset(dbPtr);
-}
-
 FDescriptorContainer DBHashCreator::getFamilyDescriptors() {
     rocksdb::Options options;
 
@@ -69,71 +57,6 @@ FDescriptorContainer DBHashCreator::getFamilyDescriptors() {
                                  rocksdb::ColumnFamilyOptions());
     }
     return descriptors;
-}
-
-//std::random_device: uniformly distributed random number generator.
-//std::mt19937: random number engine based on the Mersenne Twister algorithm.
-//std::uniform_int_distribution: distribution for random integer values between
-// two bounds in a closed interval.
-void DBHashCreator::randomFillStrings(const FContainer &container) {
-    std::random_device random_device;
-    std::mt19937 generator(random_device());
-    std::uniform_int_distribution<> distribution(0, CHARACTERS.size() - 1);
-
-    for (auto &family : container) {
-        for (size_t i = 0; i < STR_COUNT; ++i) {
-            std::string key = getRandomString(KEY_LENGTH);
-            std::string value = getRandomString(VALUE_LENGTH);
-            std::cout << "key: " << key << " value: " << value << std::endl;
-            logs::logTrace(key, value);
-            rocksdb::Status status = _db->Put(rocksdb::WriteOptions(),
-                                              family.get(),
-                                              key,
-                                              value);
-            assert(status.ok());
-        }
-    }
-}
-
-std::string DBHashCreator::getRandomString(std::size_t length) {
-    std::random_device random_device;
-    std::mt19937 generator(random_device());
-    std::uniform_int_distribution<> distribution(0, CHARACTERS.size() - 1);
-
-    std::string random_string;
-
-    for (std::size_t i = 0; i < length; ++i) {
-        random_string += CHARACTERS[distribution(generator)];
-    }
-
-    return random_string;
-}
-
-FContainer DBHashCreator::randomFillFamilies() {
-    std::random_device random_device;
-    std::mt19937 generator(random_device());
-    std::uniform_int_distribution<> distribution(0, CHARACTERS.size() - 1);
-
-    FContainer family{};
-    for (std::size_t i = 0; i < FAMILY_COUNT; ++i) {
-        std::string familyName = getRandomString(FAMILY_NAME_LENGTH);
-        std::cout << "Family: " << familyName << std::endl;
-        rocksdb::ColumnFamilyHandle *familyStrPtr;
-
-        rocksdb::Status status = _db->CreateColumnFamily(
-                rocksdb::ColumnFamilyOptions(),
-                familyName,
-                &familyStrPtr);
-        assert(status.ok());
-        family.emplace_back(familyStrPtr);
-    }
-    return family;
-}
-
-void DBHashCreator::randomFill() {
-    auto family = randomFillFamilies();
-
-    randomFillStrings(family);
 }
 
 StrContainer DBHashCreator::getStrs(rocksdb::ColumnFamilyHandle *family) {
